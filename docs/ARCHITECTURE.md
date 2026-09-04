@@ -1,14 +1,3 @@
-Absolutely — here is the **complete `docs/ARCHITECTURE.md`**, properly formatted and ready to paste.
-
-Open:
-
-```bash
-code docs/ARCHITECTURE.md
-```
-
-Then replace everything with this:
-
-````markdown
 # PasswordLens Architecture
 
 ## Overview
