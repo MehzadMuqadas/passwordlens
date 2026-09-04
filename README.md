@@ -1,6 +1,6 @@
-# 🏁 MILESTONE 10 — FINAL BUILD
+# MILESTONE 10 — FINAL BUILD
 
-**53/53 passed.** ✅
+**53/53 passed.** 
 Threat model saved. Architecture saved. Packaging works. CLI works.
 
 Now we're at the actual finale.
