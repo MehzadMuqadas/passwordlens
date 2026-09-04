@@ -4,6 +4,7 @@ from .exposure import (
     EXPOSURE_EXPOSED,
     EXPOSURE_UNKNOWN,
     lookup_password_exposure,
+    ExposureResult,
 )
 from .findings import (
     CATEGORY_EXPOSURE,
@@ -40,6 +41,7 @@ class PasswordAnalysis:
     strength: str
     findings: list[SecurityFinding]
     risk: str
+    exposure: ExposureResult | None = None
 
 
 def analyze_password(
@@ -168,6 +170,7 @@ def analyze_password(
             )
         )
 
+    exposure = None
     if check_exposure:
         exposure = lookup_password_exposure(password)
 
@@ -230,4 +233,5 @@ def analyze_password(
         strength=strength,
         findings=findings,
         risk=risk,
+        exposure=exposure,
     )

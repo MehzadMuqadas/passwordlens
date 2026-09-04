@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Frontend
+web/frontend/node_modules/
+web/frontend/dist/
+web/frontend/.env.local
+web/frontend/tsconfig.tsbuildinfo
+
+# Replit artifacts
+web/frontend/.replit-artifact/
