@@ -39,3 +39,10 @@ def test_missing_character_types_create_findings():
     assert "NO_UPPERCASE" in finding_codes
     assert "NO_NUMBER" in finding_codes
     assert "NO_SYMBOL" in finding_codes
+
+def test_common_pattern_creates_finding():
+    result = analyze_password("password123")
+
+    finding_codes = {finding.code for finding in result.findings}
+
+    assert "COMMON_PATTERN" in finding_codes

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from .findings import SecurityFinding
+from .patterns import detect_common_pattern
 from .rules import (
     MIN_PASSWORD_LENGTH,
     STRENGTH_MEDIUM,
@@ -28,6 +29,20 @@ def analyze_password(password: str) -> PasswordAnalysis:
     has_symbol = any(not char.isalnum() for char in password)
 
     findings = []
+
+    common_pattern = detect_common_pattern(password)
+
+    if common_pattern:
+        findings.append(
+            SecurityFinding(
+                code="COMMON_PATTERN",
+                title="Common password pattern detected",
+                message=(
+                    f'The password contains a commonly used pattern: "{common_pattern}".'
+                ),
+                severity="high",
+            )
+        )
 
     if len(password) < MIN_PASSWORD_LENGTH:
         findings.append(
