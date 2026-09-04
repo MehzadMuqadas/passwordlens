@@ -1,4 +1,9 @@
 from passwordlens.analyzer import analyze_password
+from passwordlens.exposure import (
+    EXPOSURE_EXPOSED,
+    EXPOSURE_UNKNOWN,
+    ExposureResult,
+)
 
 
 def test_short_password_is_weak():
@@ -95,3 +100,138 @@ def test_substitution_finding_explains_detected_transformations():
     assert "5 → s" in finding.message
     assert "0 → o" in finding.message
     assert '"password"' in finding.message
+
+
+def test_exposed_password_creates_exposure_finding(monkeypatch):
+    def fake_lookup(password):
+        return ExposureResult(
+            status=EXPOSURE_EXPOSED,
+            breach_count=12345,
+        )
+
+    monkeypatch.setattr(
+        "passwordlens.analyzer.lookup_password_exposure",
+        fake_lookup,
+    )
+
+    result = analyze_password(
+        "Password1!",
+        check_exposure=True,
+    )
+
+    codes = [finding.code for finding in result.findings]
+
+    assert "EXPOSED_PASSWORD" in codes
+
+
+def test_exposed_password_is_high_risk(monkeypatch):
+    def fake_lookup(password):
+        return ExposureResult(
+            status=EXPOSURE_EXPOSED,
+            breach_count=12345,
+        )
+
+    monkeypatch.setattr(
+        "passwordlens.analyzer.lookup_password_exposure",
+        fake_lookup,
+    )
+
+    result = analyze_password(
+        "Password1!",
+        check_exposure=True,
+    )
+
+    assert result.risk == "High"
+
+
+
+
+def test_exposure_check_is_optional(monkeypatch):
+    def fail_if_called(password):
+        raise AssertionError("Exposure lookup should not run")
+
+    monkeypatch.setattr(
+        "passwordlens.analyzer.lookup_password_exposure",
+        fail_if_called,
+    )
+
+    result = analyze_password("Password1!")
+
+    codes = [finding.code for finding in result.findings]
+
+    assert "EXPOSED_PASSWORD" not in codes
+    assert "EXPOSURE_CHECK_UNAVAILABLE" not in codes
+
+
+def test_unknown_exposure_creates_unknown_finding(monkeypatch):
+    def fake_lookup(password):
+        return ExposureResult(
+            status=EXPOSURE_UNKNOWN,
+            error="service unavailable",
+        )
+
+    monkeypatch.setattr(
+        "passwordlens.analyzer.lookup_password_exposure",
+        fake_lookup,
+    )
+
+    result = analyze_password(
+        "Password1!",
+        check_exposure=True,
+    )
+
+    codes = [finding.code for finding in result.findings]
+
+    assert "EXPOSURE_CHECK_UNAVAILABLE" in codes
+
+
+def test_unknown_exposure_does_not_create_exposed_finding(monkeypatch):
+    def fake_lookup(password):
+        return ExposureResult(
+            status=EXPOSURE_UNKNOWN,
+            error="service unavailable",
+        )
+
+    monkeypatch.setattr(
+        "passwordlens.analyzer.lookup_password_exposure",
+        fake_lookup,
+    )
+
+    result = analyze_password(
+        "Password1!",
+        check_exposure=True,
+    )
+
+    exposed_findings = [
+        finding
+        for finding in result.findings
+        if finding.code == "EXPOSED_PASSWORD"
+    ]
+
+    assert exposed_findings == []
+
+
+def test_exposure_finding_is_classified_as_exposure(monkeypatch):
+    def fake_lookup(password):
+        return ExposureResult(
+            status=EXPOSURE_EXPOSED,
+            breach_count=100,
+        )
+
+    monkeypatch.setattr(
+        "passwordlens.analyzer.lookup_password_exposure",
+        fake_lookup,
+    )
+
+    result = analyze_password(
+        "Password1!",
+        check_exposure=True,
+    )
+
+    finding = next(
+        finding
+        for finding in result.findings
+        if finding.code == "EXPOSED_PASSWORD"
+    )
+
+    assert finding.category == "exposure"

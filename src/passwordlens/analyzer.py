@@ -1,6 +1,12 @@
 from dataclasses import dataclass
 
+from .exposure import (
+    EXPOSURE_EXPOSED,
+    EXPOSURE_UNKNOWN,
+    lookup_password_exposure,
+)
 from .findings import (
+    CATEGORY_EXPOSURE,
     CATEGORY_PATTERN,
     CATEGORY_POLICY,
     SecurityFinding,
@@ -36,7 +42,10 @@ class PasswordAnalysis:
     risk: str
 
 
-def analyze_password(password: str) -> PasswordAnalysis:
+def analyze_password(
+    password: str,
+    check_exposure: bool = False,
+) -> PasswordAnalysis:
     has_uppercase = any(char.isupper() for char in password)
     has_lowercase = any(char.islower() for char in password)
     has_number = any(char.isdigit() for char in password)
@@ -77,8 +86,7 @@ def analyze_password(password: str) -> PasswordAnalysis:
                     title="Predictable character substitution detected",
                     message=(
                         "The password uses common character substitutions that "
-                        f"normalize to the predictable pattern "
-                        f'"{normalized_pattern}". '
+                        f'normalize to the predictable pattern "{normalized_pattern}". '
                         f"Detected substitutions: {substitution_details}."
                     ),
                     severity="high",
@@ -159,6 +167,37 @@ def analyze_password(password: str) -> PasswordAnalysis:
                 category=CATEGORY_POLICY,
             )
         )
+
+    if check_exposure:
+        exposure = lookup_password_exposure(password)
+
+        if exposure.status == EXPOSURE_EXPOSED:
+            findings.append(
+                SecurityFinding(
+                    code="EXPOSED_PASSWORD",
+                    title="Password found in breach data",
+                    message=(
+                        "This password appears in known breach data and should "
+                        "not be used for authentication."
+                    ),
+                    severity="high",
+                    category=CATEGORY_EXPOSURE,
+                )
+            )
+
+        elif exposure.status == EXPOSURE_UNKNOWN:
+            findings.append(
+                SecurityFinding(
+                    code="EXPOSURE_CHECK_UNAVAILABLE",
+                    title="Password exposure could not be verified",
+                    message=(
+                        "The breach lookup could not be completed. "
+                        "Exposure status is unknown."
+                    ),
+                    severity="low",
+                    category=CATEGORY_EXPOSURE,
+                )
+            )
 
     score = sum(
         [
