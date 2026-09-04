@@ -1,10 +1,4 @@
-Absolutely. Here is the **entire `THREAT_MODEL.md` properly formatted as Markdown**. You can copy everything inside the code block and paste it directly into:
 
-```text
-docs/THREAT_MODEL.md
-```
-
-````markdown
 # PasswordLens Threat Model
 
 ## 1. Purpose
