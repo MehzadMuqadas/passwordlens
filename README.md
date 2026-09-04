@@ -111,18 +111,3 @@ That's the problem I wanted to make visible.
 ## License
 
 MIT
-
-```
-
-**That is much stronger.**
-
-It gives someone scrolling your GitHub:
-
-**What is it? → Why is it interesting? → Show me → How does it work? → Can I run it? → Is it serious?**
-
-And then they can dig into `docs/` if they want the deeper engineering material.
-
-One more thing: because the current README still says **“Future Work → Web-based interface,”** I would absolutely fix that before we announce the project. :contentReference[oaicite:5]{index=5}
-
-**I would rewrite it now.** This is one of the last things I'd polish before you start putting PasswordLens on your LinkedIn/X/GitHub portfolio.
-```
