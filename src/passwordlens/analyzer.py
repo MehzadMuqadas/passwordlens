@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from .findings import SecurityFinding
 from .rules import (
     MIN_PASSWORD_LENGTH,
     STRENGTH_MEDIUM,
@@ -17,6 +18,7 @@ class PasswordAnalysis:
     has_symbol: bool
     score: int
     strength: str
+    findings: list[SecurityFinding]
 
 
 def analyze_password(password: str) -> PasswordAnalysis:
@@ -24,6 +26,48 @@ def analyze_password(password: str) -> PasswordAnalysis:
     has_lowercase = any(char.islower() for char in password)
     has_number = any(char.isdigit() for char in password)
     has_symbol = any(not char.isalnum() for char in password)
+
+    findings = []
+
+    if len(password) < MIN_PASSWORD_LENGTH:
+        findings.append(
+            SecurityFinding(
+                code="SHORT_PASSWORD",
+                title="Password is too short",
+                message="Longer passwords are generally harder to guess.",
+                severity="high",
+            )
+        )
+
+    if not has_uppercase:
+        findings.append(
+            SecurityFinding(
+                code="NO_UPPERCASE",
+                title="No uppercase letters",
+                message="This password does not contain uppercase letters.",
+                severity="low",
+            )
+        )
+
+    if not has_number:
+        findings.append(
+            SecurityFinding(
+                code="NO_NUMBER",
+                title="No numbers",
+                message="This password does not contain numbers.",
+                severity="low",
+            )
+        )
+
+    if not has_symbol:
+        findings.append(
+            SecurityFinding(
+                code="NO_SYMBOL",
+                title="No symbols",
+                message="This password does not contain symbols.",
+                severity="low",
+            )
+        )
 
     score = sum(
         [
@@ -52,4 +96,5 @@ def analyze_password(password: str) -> PasswordAnalysis:
         has_symbol=has_symbol,
         score=score,
         strength=strength,
+        findings=findings,
     )
